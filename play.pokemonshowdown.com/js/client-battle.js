@@ -780,8 +780,7 @@
 					}
 				}
 				var switchControls = (
-					'<div class="switchcontrols">' +
-					'<div class="switchselect"><button name="selectSwitch">Switch</button></div>' +
+					'<div class="switchcontrols" style="margin-top: 7px;">' +
 					'<div class="switchmenu">' + switchMenu + '</div>' +
 					'</div>'
 				);
@@ -799,14 +798,54 @@
 				var pokemon = switchables[i];
 				pokemon.name = pokemon.ident.substr(4);
 				var tooltipArgs = 'switchpokemon|' + i;
+				
+				// Start a container div for each pokemon
+				party += '<div class="pokemon-container" style="display: inline-block;text-align: left;">';
+				
+				// Button part remains similar but without tooltip
 				if (pokemon.fainted || i < this.battle.pokemonControlled || this.choice.switchFlags[i] || trapped) {
-					party += '<button class="disabled has-tooltip" name="chooseDisabled" value="' + BattleLog.escapeHTML(pokemon.name) + (pokemon.fainted ? ',fainted' : trapped ? ',trapped' : i < this.battle.nearSide.active.length ? ',active' : '') + '" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '"><span class="picon" style="' + Dex.getPokemonIcon(pokemon) + '"></span>' + BattleLog.escapeHTML(pokemon.name) + (pokemon.hp ? '<span class="' + pokemon.getHPColorClass() + '"><span style="width:' + (Math.round(pokemon.hp * 92 / pokemon.maxhp) || 1) + 'px"></span></span>' + (pokemon.status ? '<span class="status ' + pokemon.status + '"></span>' : '') : '') + '</button> ';
+					party += '<button class="disabled" name="chooseDisabled" value="' + BattleLog.escapeHTML(pokemon.name) + 
+							(pokemon.fainted ? ',fainted' : trapped ? ',trapped' : i < this.battle.nearSide.active.length ? ',active' : '') + 
+							'"><span class="picon" style="' + Dex.getPokemonIcon(pokemon) + '"></span>' + 
+							BattleLog.escapeHTML(pokemon.name) + 
+							(pokemon.hp ? '<span class="' + pokemon.getHPColorClass() + '"><span style="width:' + 
+							(Math.round(pokemon.hp * 92 / pokemon.maxhp) || 1) + 'px"></span></span>' + 
+							(pokemon.status ? '<span class="status ' + pokemon.status + '"></span>' : '') : '') + '</button>';
 				} else {
-					party += '<button name="chooseSwitch" value="' + i + '" class="has-tooltip" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '"><span class="picon" style="' + Dex.getPokemonIcon(pokemon) + '"></span>' + BattleLog.escapeHTML(pokemon.name) + '<span class="' + pokemon.getHPColorClass() + '"><span style="width:' + (Math.round(pokemon.hp * 92 / pokemon.maxhp) || 1) + 'px"></span></span>' + (pokemon.status ? '<span class="status ' + pokemon.status + '"></span>' : '') + '</button> ';
+					party += '<button name="chooseSwitch" value="' + i + '"><span class="picon" style="' + 
+							Dex.getPokemonIcon(pokemon) + '"></span>' + BattleLog.escapeHTML(pokemon.name) + 
+							'<span class="' + pokemon.getHPColorClass() + '"><span style="width:' + 
+							(Math.round(pokemon.hp * 92 / pokemon.maxhp) || 1) + 'px"></span></span>' + 
+							(pokemon.status ? '<span class="status ' + pokemon.status + '"></span>' : '') + '</button>';
 				}
+				
+				// Add tooltip info directly under the button
+				party += '<div class="pokemon-details" style="font-size: 11px; margin-top: 2px;">';
+				// You'll need to get the actual tooltip content here - this is just an example
+				party += this.getTooltipContent(pokemon);
+				party += '</div>';
+				
+				// Close the container div
+				party += '</div>';
 			}
 			if (this.battle.mySide.ally) party += this.displayAllyParty();
 			return party;
+		},
+		getTooltipContent: function(pokemon) {
+			var content = '';
+			if (pokemon.teraType) content += '<div>Tera Type: ' + Dex.types.get(pokemon.teraType).name + '</div>';
+			if (pokemon.ability) content += '<div>' + Dex.abilities.get(pokemon.ability).name + '</div>';
+			if (pokemon.item) content += '<div>' + Dex.items.get(pokemon.item).name + '</div>';
+			if (pokemon.moves) {
+				for (var i = 0; i < pokemon.moves.length; i++) {
+					// Handle case where moves might be strings or objects
+					var moveName = typeof pokemon.moves[i] === 'string' ? 
+								  pokemon.moves[i] : 
+								  pokemon.moves[i].move;
+					content += '<div>' + Dex.moves.get(moveName).name + '</div>';
+				}
+			}
+			return content;
 		},
 		displayAllyParty: function () {
 			var party = '';
@@ -892,7 +931,7 @@
 						}
 					} else {
 						if (pokemon.fainted || i < this.battle.pokemonControlled || this.choice.switchFlags[i]) {
-							switchMenu += '<button class="disabled has-tooltip" name="chooseDisabled" value="' + BattleLog.escapeHTML(pokemon.name) + (pokemon.fainted ? ',fainted' : i < this.battle.pokemonControlled ? ',active' : '') + '" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '">';
+							switchMenu += '<button class="disabled has-tooltip" name="chooseDisabled" value="' + BattleLog.escapeHTML(pokemon.name) + (pokemon.fainted ? ',fainted' : i < this.battle.nearSide.active.length ? ',active' : '') + '" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '">';
 						} else {
 							switchMenu += '<button name="chooseSwitch" value="' + i + '" class="has-tooltip" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '">';
 						}
@@ -901,7 +940,7 @@
 				}
 
 				var controls = (
-					'<div class="switchcontrols">' +
+					'<div class="switchcontrols" style="margin-top: 10px;">' +
 					'<div class="switchselect"><button name="selectSwitch">' + (isReviving ? 'Revive' : 'Switch') + '</button></div>' +
 					'<div class="switchmenu">' + switchMenu + '</div>' +
 					'</div>'
