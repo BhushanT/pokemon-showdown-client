@@ -221,6 +221,7 @@
 				} else if (logLine.substr(0, 5) === '|win|' || logLine === '|tie') {
 					this.battleEnded = true;
 					this.battle.stepQueue.push(logLine);
+					this.send('/leave');
 				} else if (logLine.substr(0, 6) === '|chat|' || logLine.substr(0, 3) === '|c|' || logLine.substr(0, 4) === '|c:|' || logLine.substr(0, 9) === '|chatmsg|' || logLine.substr(0, 10) === '|inactive|') {
 					this.battle.instantAdd(logLine);
 				} else {
@@ -953,43 +954,6 @@
 				);
 				this.selectSwitch();
 			}
-		},
-		updateTeamControls: function (type) {
-			var switchables = this.request && this.request.side ? this.battle.myPokemon : [];
-			var maxIndex = Math.min(switchables.length, 24);
-
-			var requestTitle = "";
-			if (this.choice.done) {
-				requestTitle = '<button name="clearChoice">Back</button> ' + "What about the rest of your team?";
-			} else {
-				requestTitle = "How will you start the battle?";
-			}
-
-			var switchMenu = '';
-			for (var i = 0; i < maxIndex; i++) {
-				var oIndex = this.choice.teamPreview[i] - 1;
-				var pokemon = switchables[oIndex];
-				var tooltipArgs = 'switchpokemon|' + oIndex;
-				if (i < this.choice.done) {
-					switchMenu += '<button disabled class="has-tooltip" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '"><span class="picon" style="' + Dex.getPokemonIcon(pokemon) + '"></span>' + BattleLog.escapeHTML(pokemon.name) + '</button> ';
-				} else {
-					switchMenu += '<button name="chooseTeamPreview" value="' + i + '" class="has-tooltip" data-tooltip="' + BattleLog.escapeHTML(tooltipArgs) + '"><span class="picon" style="' + Dex.getPokemonIcon(pokemon) + '"></span>' + BattleLog.escapeHTML(pokemon.name) + '</button> ';
-				}
-			}
-
-			var controls = (
-				'<div class="switchcontrols">' +
-				'<div class="switchselect"><button name="selectSwitch">' + (this.choice.done ? '' + "Choose a Pokémon for slot " + (this.choice.done + 1) : "Choose Lead") + '</button></div>' +
-				'<div class="switchmenu">' + switchMenu + '</div>' +
-				'</div>'
-			);
-			this.$controls.html(
-				'<div class="controls">' +
-				'<div class="whatdo">' + requestTitle + this.getTimerHTML() + '</div>' +
-				controls +
-				'</div>'
-			);
-			this.selectSwitch();
 		},
 		updateWaitControls: function () {
 			var buf = '<div class="controls">';
